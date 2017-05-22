@@ -1,0 +1,29 @@
+{
+  "name": "jarbitlira/credomatic-gateway",
+  "description": "php credomatic gateway",
+  "keywords": [
+    "credomatic",
+    "gateway",
+    "composer"
+  ],
+  "type": "library",
+  "require": {
+    "guzzlehttp/guzzle": "^6.2"
+  },
+  "authors": [
+    {
+      "name": "Jarbit Lira",
+      "email": "dev@jarbitlira.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "JarbitLira\\Credomatic\\": "src/"
+    }
+  },
+  "minimum-stability": "dev",
+  "license": "MIT",
+  "require-dev": {
+    "phpunit/phpunit": "^6.1@dev"
+  }
+}
