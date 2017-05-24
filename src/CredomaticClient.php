@@ -49,7 +49,8 @@ class CredomaticClient
         ]);
 
         $result = $this->credomacticRequest($data);
-        $this->result = $result; //convert to object
+
+        return $this->parseResult($result);
     }
 
     /**
@@ -65,9 +66,7 @@ class CredomaticClient
 
         $result = $this->credomacticRequest($data);
 
-        $this->setResult($result);
-
-        return $this->getResult();
+        return $this->parseResult($result);
     }
 
     /**
@@ -82,9 +81,7 @@ class CredomaticClient
 
         $result = $this->credomacticRequest($data);
 
-        $this->setResult($result);
-
-        return $this->getResult();
+        return $this->parseResult($result);
     }
 
     /**
@@ -149,6 +146,12 @@ class CredomaticClient
         ];
 
         $this->result = $result;
+    }
+
+    private function parseResult($result)
+    {
+        $this->setResult($result);
+        return $this->getResult();
     }
 
     /**
