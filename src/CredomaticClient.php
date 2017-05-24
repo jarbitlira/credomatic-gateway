@@ -42,34 +42,32 @@ class CredomaticClient
      */
     public function processPayment($orderId, $amount, $ccnumber, $cvv, $ccexp)
     {
-        $GuzzleClient = new GuzzleClient();
-
         $data = array_merge($this->makeBasicRequestParams('auth', $orderId, $amount), [
             'ccnumber' => $ccnumber, //card number
             'cvv' => $cvv, //security code
             'ccexp' => str_replace(["/", "-"], "", $ccexp),//expiration date in format mmyy
         ]);
 
-        $requestResponse = $GuzzleClient->post($this->credomaticWebservice, ['body' => $data]);
-
-        $res = str_replace("?", "", $requestResponse->getBody()); //drop symbol '?' in response
-        parse_str($res, $response); //convert to array
-
-        $result = (object)$response; //convert to object
+        $result = $this->credomacticRequest($data);
         $this->result = $result; //convert to object
+    }
 
-        return [
-            'response' => $result->response,
-            'response_text' => $result->responsetext,
-            'authcode' => $result->authcode,
-            'transactionid' => $result->transactionid,
-            'avsresponse' => $result->avsresponse,
-            'cvvresponse' => $result->cvvresponse,
-            'response_code' => $result->response_code,
-            'amount' => $result->amount,
-            'orderid' => $result->orderid,
-            'type_transaction' => $result->type
-        ];
+    /**
+     * @param $orderId
+     * @param $transactionId
+     * @param $amount
+     * @return array
+     */
+    public function authorizeTransaction($orderId, $transactionId, $amount)
+    {
+        $data = $this->makeBasicRequestParams('sale', $orderId, $amount);
+        array_push($data, "transaction_id", $transactionId);
+
+        $result = $this->credomacticRequest($data);
+
+        $this->setResult($result);
+
+        return $this->getResult();
     }
 
     /**
@@ -86,38 +84,58 @@ class CredomaticClient
     public function getAuthCode()
     {
         $result = $this->result;
-        if (isset($result->authcode))
-            return $result->authcode;
+        if (isset($result->auth_code))
+            return $result->auth_code;
         return false;
     }
 
+//    public function getMessage()
+//    {
+//        $result = $this->result;
+//        $error = array("code" => 0, "message" => "transaccion no realizada");
+//        if (isset($result->response_code)) {
+//            $message = isset($this->responsesCodes[$result->response_code]) ?
+//                $this->responsesCodes[$result->response_code] : $result->responsetext;
+//
+//            $error = array("code" => $result->response_code, "message" => $message);
+//            if (isset($result->transactionid)) {
+//                $error["transactionid"] = $result->transactionid;
+//            }
+//        }
+//        return $error;
+//    }
+
     /**
-     * @return object
+     * @return array
      */
     public function getResult()
     {
-        $result = $this->result;
-        return $result;
-    }
-
-    public function getMessage()
-    {
-        $result = $this->result;
-        $error = array("code" => 0, "message" => "transaccion no realizada");
-        if (isset($result->response_code)) {
-            $message = isset($this->responsesCodes[$result->response_code]) ?
-                $this->responsesCodes[$result->response_code] : $result->responsetext;
-
-            $error = array("code" => $result->response_code, "message" => $message);
-            if (isset($result->transactionid)) {
-                $error["transactionid"] = $result->transactionid;
-            }
-        }
-        return $error;
+        return $this->result;
     }
 
     /**
-     * @param string("auth", "sale") $type
+     * @param $result
+     */
+    private function setResult($result)
+    {
+        $result = [
+            'response' => $result->response,
+            'response_text' => $result->responsetext,
+            'auth_code' => $result->authcode,
+            'transaction_id' => $result->transactionid,
+            'avs_response' => $result->avsresponse,
+            'cvv_response' => $result->cvvresponse,
+            'response_code' => $result->response_code,
+            'amount' => $result->amount,
+            'order_id' => $result->orderid,
+            'type_transaction' => $result->type
+        ];
+
+        $this->result = $result;
+    }
+
+    /**
+     * @param string("auth", "sale", "void") $type
      * @param $orderId
      * @param null $amount
      * @return array
@@ -145,5 +163,20 @@ class CredomaticClient
                 'orderid' => $orderId,
                 'amount' => $amount,
             ];
+    }
+
+    /**
+     * @param array $data
+     * @return object
+     */
+    private function credomacticRequest($data)
+    {
+        $GuzzleClient = new GuzzleClient();
+        $requestResponse = $GuzzleClient->post($this->credomaticWebservice, ['body' => $data]);
+
+        $res = str_replace("?", "", $requestResponse->getBody()); //drop symbol '?' in response
+        parse_str($res, $response); //convert string params to array
+
+        return (object)$response; //convert to object
     }
 }
