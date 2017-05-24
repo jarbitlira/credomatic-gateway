@@ -71,6 +71,23 @@ class CredomaticClient
     }
 
     /**
+     * @param $orderId
+     * @param $transactionId
+     * @return array
+     */
+    public function cancelTransaction($orderId, $transactionId)
+    {
+        $data = $this->makeBasicRequestParams('void', $orderId);
+        array_push($data, "transaction_id", $transactionId);
+
+        $result = $this->credomacticRequest($data);
+
+        $this->setResult($result);
+
+        return $this->getResult();
+    }
+
+    /**
      * @return bool
      */
     public function succeeded()
