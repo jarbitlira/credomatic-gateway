@@ -10,7 +10,7 @@ namespace JarbitLira\Credomatic;
 
 use GuzzleHttp\Client as GuzzleClient;
 
-class Client
+class CredomaticClient
 {
     private $result;
     private $credomaticWebservice = "https://paycom.credomatic.com/PayComBackEndWeb/common/requestPaycomService.go";
@@ -38,39 +38,17 @@ class Client
      * @param $ccnumber
      * @param $cvv
      * @param $ccexp
-     * @return mixed
+     * @return array
      */
     public function processPayment($orderId, $amount, $ccnumber, $cvv, $ccexp)
     {
         $GuzzleClient = new GuzzleClient();
 
-        $time = time();
-
-        $hash = array(
-            'orderid' => $orderId,
-            'amount' => $amount,
-            'time' => $time,
-            'key' => $this->privateKey, // bac_key or private_key
-        );
-
-        $hashCode = md5(implode("|", $hash));
-
-        $data = array(
-            'username' => $this->userName, // bac_username
-            'type' => 'auth',
-            'key_id' => $this->publicKey, // bac_key_id or public_key
-            'hash' => $hashCode,
-            'time' => $time,
-            'amount' => $amount,
-            'orderid' => $orderId,
-//            'processor_id',
+        $data = array_merge($this->makeBasicRequestParams('auth', $orderId, $amount), [
             'ccnumber' => $ccnumber, //card number
             'cvv' => $cvv, //security code
-            'ccexp' => $ccexp,//expiration date in format mmyy
-//            'avs',
-//            'zip',
-//            'redirect',
-        );
+            'ccexp' => str_replace(["/", "-"], "", $ccexp),//expiration date in format mmyy
+        ]);
 
         $requestResponse = $GuzzleClient->post($this->credomaticWebservice, ['body' => $data]);
 
@@ -136,5 +114,36 @@ class Client
             }
         }
         return $error;
+    }
+
+    /**
+     * @param string("auth", "sale") $type
+     * @param $orderId
+     * @param null $amount
+     * @return array
+     */
+    private function makeBasicRequestParams($type, $orderId, $amount = null)
+    {
+        $time = time();
+
+        $hash = array(
+            'orderid' => $orderId,
+            'amount' => $amount,
+            'time' => $time,
+            'key' => $this->privateKey, // bac_key or private_key
+        );
+
+        $hashCode = md5(implode("|", $hash));
+
+        return
+            $data = [
+                'username' => $this->userName, // bac_username
+                'type' => $type,
+                'key_id' => $this->publicKey, // bac_key_id or public_key
+                'hash' => $hashCode,
+                'time' => $time,
+                'orderid' => $orderId,
+                'amount' => $amount,
+            ];
     }
 }
