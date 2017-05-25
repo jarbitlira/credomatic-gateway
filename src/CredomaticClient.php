@@ -103,22 +103,6 @@ class CredomaticClient
         return false;
     }
 
-//    public function getMessage()
-//    {
-//        $result = $this->result;
-//        $error = array("code" => 0, "message" => "transaccion no realizada");
-//        if (isset($result->response_code)) {
-//            $message = isset($this->responsesCodes[$result->response_code]) ?
-//                $this->responsesCodes[$result->response_code] : $result->responsetext;
-//
-//            $error = array("code" => $result->response_code, "message" => $message);
-//            if (isset($result->transactionid)) {
-//                $error["transactionid"] = $result->transactionid;
-//            }
-//        }
-//        return $error;
-//    }
-
     /**
      * @return array
      */
