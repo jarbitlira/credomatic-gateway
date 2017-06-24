@@ -20,16 +20,20 @@ class CredomaticClient
     private $publicKey;
 
     /**
-     * Client constructor.
-     * @param $userName
-     * @param $privateKey
-     * @param $publicKey
+     * CredomaticClient constructor.
+     * @param string $userName
+     * @param string $privateKey
+     * @param string $publicKey
+     * @param null|string $credomaticWebservice
      */
-    public function __construct($userName, $privateKey, $publicKey)
+    public function __construct($userName, $privateKey, $publicKey, $credomaticWebservice = null)
     {
         $this->userName = $userName;
         $this->privateKey = $privateKey;
         $this->publicKey = $publicKey;
+        $this->credomaticWebservice = is_null($credomaticWebservice) ?
+            $this->credomaticWebservice :
+            $credomaticWebservice;
     }
 
     /**
@@ -176,7 +180,9 @@ class CredomaticClient
     private function credomacticRequest($data)
     {
         $GuzzleClient = new GuzzleClient();
-        $requestResponse = $GuzzleClient->post($this->credomaticWebservice, ['body' => $data]);
+        $requestResponse = $GuzzleClient->post($this->credomaticWebservice,
+            ['form_params' => $data]
+        );
 
         $res = str_replace("?", "", $requestResponse->getBody()); //drop symbol '?' in response
         parse_str($res, $response); //convert string params to array
