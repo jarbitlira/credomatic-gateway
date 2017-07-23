@@ -1,4 +1,4 @@
-##[jarbitlira/credomatic-gateway](https:://github.com/jarbitlira/credomatic-gateway)
+## [jarbitlira/credomatic-gateway](https:://github.com/jarbitlira/credomatic-gateway)
 
 [![Latest Stable Version](https://poser.pugx.org/jarbitlira/credomatic-gateway/v/stable)](https://packagist.org/packages/jarbitlira/credomatic-gateway)
 [![Total Downloads](https://poser.pugx.org/jarbitlira/credomatic-gateway/downloads)](https://packagist.org/packages/jarbitlira/credomatic-gateway)
